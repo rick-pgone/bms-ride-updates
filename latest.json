@@ -1,19 +1,17 @@
 {
   "schema_version": 1,
-  "version_code": 13,
-  "version_name": "0.3.10",
-  "published_at": "2026-07-19T07:56:20Z",
+  "version_code": 14,
+  "version_name": "0.3.11",
+  "published_at": "2026-07-19T08:08:53Z",
   "mandatory": false,
   "title": "电池监控可以更新了",
-  "summary": "修复远程诊断上传 401，云端日志会自动恢复补传。",
+  "summary": "应用内更新链路真机验收版本。",
   "release_notes": [
-    "修复诊断批量去重触发 Supabase 权限检查导致的 401",
-    "诊断上传改为纯写入，不开放客户端读取云端日志",
-    "响应丢失时自动识别唯一键冲突并拆分补传",
-    "本地积压日志在更新后可通过立即上传或后台任务恢复"
+    "保留 0.3.10 的远程诊断 401 修复",
+    "用于验证应用内检查、下载、校验与系统安装流程"
   ],
-  "apk_url": "https://rick-pgone.github.io/bms-ride-updates/battery-monitor-0.3.10.apk",
-  "apk_sha256": "b52b449b1f8d77b3f3a625bcd51fb5676a119ec81f57b0e80395217fd45b0515",
-  "apk_size_bytes": 93400,
+  "apk_url": "https://rick-pgone.github.io/bms-ride-updates/battery-monitor-0.3.11.apk",
+  "apk_sha256": "b783ca791a6029975c7f35b0e6a98555801caaf9cb0375fecb6764d4116f541c",
+  "apk_size_bytes": 93404,
   "signing_cert_sha256": "3c13a28da284d53d663f121c366892fb14d6114aab9a601c009e7c5f66cf3217"
 }
