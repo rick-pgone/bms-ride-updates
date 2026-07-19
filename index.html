@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f8fa">
+  <title>电池监控 - 共享状态</title>
+  <style>
+    :root {
+      --page: #edf2f5;
+      --surface: #f8fafb;
+      --ink: #172235;
+      --muted: #728093;
+      --line: #dce4e9;
+      --accent: #00aeca;
+      --accent-soft: #e7f7f9;
+      --positive: #00ad72;
+      --positive-soft: #e8f8f1;
+      --warning: #e89b13;
+      --warning-soft: #fff6e5;
+      --offline: #7d8998;
+      --offline-soft: #eef1f4;
+      --danger: #e45454;
+      --shadow: 0 24px 70px rgba(38, 58, 76, .13);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    .preview-stage {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+    }
+
+    .share-page {
+      width: min(100%, 430px);
+      min-height: min(820px, calc(100svh - 56px));
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid rgba(23, 34, 53, .08);
+      box-shadow: var(--shadow);
+    }
+
+    .top-rule {
+      height: 4px;
+      background: var(--state-color, var(--positive));
+    }
+
+    .shell {
+      min-height: 0;
+      flex: 1;
+      padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #e8f7f7;
+    }
+
+    .brand-mark svg {
+      width: 34px;
+      height: 34px;
+      display: block;
+    }
+
+    .brand-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .brand-name {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 760;
+    }
+
+    .brand-subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .state-tag {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border: 1px solid color-mix(in srgb, var(--state-color, var(--positive)) 32%, transparent);
+      border-radius: 999px;
+      background: var(--state-soft, var(--positive-soft));
+      color: var(--state-color, var(--positive));
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 760;
+    }
+
+    .freshness {
+      margin-top: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .freshness strong {
+      color: var(--ink);
+      font-weight: 650;
+    }
+
+    .freshness > span { min-width: 0; }
+
+    .freshness time {
+      max-width: 54%;
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    .pulse {
+      width: 7px;
+      height: 7px;
+      display: inline-block;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: var(--state-color, var(--positive));
+      vertical-align: 1px;
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--state-color, var(--positive)) 25%, transparent);
+      animation: pulse 2.4s ease-out infinite;
+    }
+
+    .offline .pulse { animation: none; }
+
+    .battery-focus {
+      padding: 42px 0 36px;
+      text-align: center;
+    }
+
+    .battery-label {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 620;
+    }
+
+    .soc-line {
+      margin-top: 10px;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      color: var(--state-color, var(--positive));
+    }
+
+    .soc-value {
+      font-size: 88px;
+      line-height: .96;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .soc-unit {
+      margin-left: 5px;
+      font-size: 28px;
+      font-weight: 760;
+    }
+
+    .battery-track {
+      width: min(292px, 88%);
+      height: 9px;
+      margin: 30px auto 0;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e3e9ed;
+    }
+
+    .battery-fill {
+      width: var(--soc, 68%);
+      height: 100%;
+      border-radius: inherit;
+      background: var(--state-color, var(--positive));
+      transition: width .45s ease, background-color .25s ease;
+    }
+
+    .range-row {
+      padding: 22px 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .range-copy span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .range-copy strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .range-value {
+      color: var(--accent);
+      font-size: 31px;
+      line-height: 1;
+      font-weight: 780;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .range-value small {
+      margin-left: 3px;
+      font-size: 14px;
+      font-weight: 720;
+    }
+
+    .notice {
+      margin-top: 20px;
+      padding: 13px 14px;
+      display: none;
+      align-items: flex-start;
+      gap: 10px;
+      border: 1px solid #f0d59f;
+      border-radius: 8px;
+      background: var(--warning-soft);
+      color: #9b680b;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .notice-icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      display: grid;
+      place-items: center;
+      border: 1.5px solid currentColor;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .low .notice { display: flex; }
+
+    .page-foot {
+      margin-top: auto;
+      padding-top: 34px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.55;
+    }
+
+    .page-foot strong {
+      color: #536174;
+      font-weight: 650;
+    }
+
+    .online {
+      --state-color: var(--positive);
+      --state-soft: var(--positive-soft);
+    }
+
+    .charging {
+      --state-color: var(--accent);
+      --state-soft: var(--accent-soft);
+    }
+
+    .riding {
+      --state-color: var(--positive);
+      --state-soft: var(--positive-soft);
+    }
+
+    .offline {
+      --state-color: var(--offline);
+      --state-soft: var(--offline-soft);
+    }
+
+    .low {
+      --state-color: var(--warning);
+      --state-soft: var(--warning-soft);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--state-color) 28%, transparent); }
+      70%, 100% { box-shadow: 0 0 0 7px transparent; }
+    }
+
+    @media (max-width: 680px) {
+      .preview-stage { display: block; padding: 0; }
+      .share-page {
+        width: 100%;
+        min-height: 100svh;
+        border: 0;
+        box-shadow: none;
+      }
+      .shell { padding-left: 20px; padding-right: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pulse { animation: none; }
+      .battery-fill { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="preview-stage">
+    <section class="share-page offline" id="sharePage" style="--soc:0%" aria-label="电动车电量共享状态">
+      <div class="top-rule"></div>
+      <div class="shell">
+        <header class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 108 108" role="img">
+              <circle cx="54" cy="54" r="49" fill="#eaf9f7"/>
+              <path fill="#00aeca" d="M31 35c0-5 4-9 9-9h23c5 0 9 4 9 9v3h3c3 0 5 2 5 5v22c0 3-2 5-5 5h-3v3c0 5-4 9-9 9H40c-5 0-9-4-9-9z"/>
+              <rect x="39" y="35" width="26" height="38" rx="5" fill="#fff"/>
+              <path fill="#00b978" d="M44 58h16v10H44z"/>
+              <path fill="#00aeca" d="M56 39 43 57h10l-2 15 14-20H55z"/>
+            </svg>
+          </div>
+          <div class="brand-copy">
+            <h1 class="brand-name">电池监控</h1>
+            <div class="brand-subtitle">电动车共享状态</div>
+          </div>
+          <div class="state-tag" id="stateTag">读取中</div>
+        </header>
+
+        <div class="freshness">
+          <span><i class="pulse"></i><strong id="freshnessTitle">正在读取云端数据</strong></span>
+          <time id="updatedAt">请稍候</time>
+        </div>
+
+        <section class="battery-focus" aria-labelledby="batteryLabel">
+          <div class="battery-label" id="batteryLabel">当前电量</div>
+          <div class="soc-line">
+            <span class="soc-value" id="socValue">--</span><span class="soc-unit">%</span>
+          </div>
+          <div class="battery-track" aria-hidden="true">
+            <div class="battery-fill"></div>
+          </div>
+        </section>
+
+        <section class="range-row" aria-label="预计续航">
+          <div class="range-copy">
+            <span>预计续航</span>
+            <strong id="rangeNote">等待电池监控 App 同步</strong>
+          </div>
+          <div class="range-value"><span id="rangeValue">--</span><small>km</small></div>
+        </section>
+
+        <div class="notice" role="status">
+          <span class="notice-icon">!</span>
+          <span>电量不足，请及时充电</span>
+        </div>
+
+        <footer class="page-foot">
+          数据由 <strong>电池监控 App</strong> 每 5 分钟同步<br>
+          页面将在后台自动刷新
+        </footer>
+      </div>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="status-model.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
