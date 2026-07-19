@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "version_code": 6,
-  "version_name": "0.3.3",
-  "published_at": "2026-07-19T05:53:01Z",
+  "version_code": 7,
+  "version_name": "0.3.4",
+  "published_at": "2026-07-19T06:33:50Z",
   "mandatory": false,
   "title": "电池监控可以更新了",
-  "summary": "修复更新下载超时后重复下载的问题。",
-  "release_notes": ["下载源切换到更稳定的 Pages CDN", "自动复用已校验的本地安装包"],
-  "apk_url": "https://rick-pgone.github.io/bms-ride-updates/battery-monitor-0.3.3.apk",
-  "apk_sha256": "cde1ed4129fb2f1998f7c7f928061a084c633e979ce3982fc0741169f9bcb06d",
-  "apk_size_bytes": 103770,
+  "summary": "修复升级完成后仍显示相同版本更新的问题。",
+  "release_notes": ["缓存更新检查会正确比较当前版本", "保留稳定下载与本地安装包复用机制"],
+  "apk_url": "https://rick-pgone.github.io/bms-ride-updates/battery-monitor-0.3.4.apk",
+  "apk_sha256": "4882310c59cf6be20410dd7ea9545aae4eb0f1f3a997c791229a57e41c9303a2",
+  "apk_size_bytes": 103762,
   "signing_cert_sha256": "3c13a28da284d53d663f121c366892fb14d6114aab9a601c009e7c5f66cf3217"
 }
